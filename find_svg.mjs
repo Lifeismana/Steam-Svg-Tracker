@@ -1,3 +1,4 @@
+import {basename, sep as pathSep } from "path";
 import { readFile } from "fs/promises";
 import { createWriteStream, existsSync, mkdirSync, rmSync, readdirSync } from "fs";
 import { createHash } from "node:crypto";
@@ -23,18 +24,27 @@ for (const file of files) {
 	try {
 		const code = await readFile(file);
 		const ast = parse(code, { ecmaVersion: latestEcmaVersion, loc: true });
-
+		let last_function_seen = null;
+		const file_basename = basename(file, '.js');
 		console.log("Parsing", file);
+		// output folder / resource folder / file name
+		const outputFolder = `${outputPath}/${file.replace(process.cwd(), '').split(pathSep)[1]}/${file_basename}`;
+		if (!existsSync(outputFolder))
+			mkdirSync(outputFolder, { recursive: true });
 
         traverse(ast, {
             enter: function (node) {
+				if(node.type === Syntax.FunctionDeclaration) {
+					last_function_seen = node;
+				}
+				
 				if (node.type === Syntax.CallExpression && node.callee?.property?.name === 'createElement' && node.arguments?.[0].value === 'svg') {
 					// as i understand it we don't want to go deeper if it's an svg (bc there can be svg in svg but we're only interested in the one most "outside")
 					this.skip();
 					const svg = (createSvgBody(node)).end({ prettyPrint: true });
 					const hash = createHash('sha1').update(svg).digest('hex').substring(0,16);
 					console.debug(`Hash ${hash} from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
-					OutputToFile(`./svgs/${hash}.svg`, svg);
+					OutputToFile(`${outputFolder}/${last_function_seen.id.name}_${hash}.svg`, svg);
             }}
 
 		});
