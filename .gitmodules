@@ -1,0 +1,8 @@
+[submodule "SteamTracking"]
+	path = SteamTracking
+	url = git@github.com:SteamDatabase/SteamTracking.git
+	shallow = true
+[submodule "GameTracking-SteamVR"]
+	path = GameTracking-SteamVR
+	url = git@github.com:Lifeismana/GameTracking-SteamVR.git
+	shallow = true
