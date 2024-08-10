@@ -40,8 +40,7 @@ for (const file of files) {
 					this.skip();
 					const svg = (createSvgBody(node)).end({ prettyPrint: true });
 					const hash = createHash('sha1').update(svg).digest('hex').substring(0,16);
-					console.log("Debug hash", hash);
-					console.log("Debug svg", svg);
+					console.debug(`Hash ${hash} from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
 					OutputToFile(`./svgs/${hash}.svg`, svg);
             }}
 
