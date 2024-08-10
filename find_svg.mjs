@@ -1,5 +1,4 @@
-import { join as pathJoin } from "path";
-import { readFile, writeFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import { createWriteStream, existsSync, mkdirSync, rmSync, readdirSync } from "fs";
 import { createHash } from "node:crypto";
 import { parse, latestEcmaVersion } from "espree";
@@ -11,15 +10,9 @@ const outputPath = "./svgs";
 const files = await GetFilesToParse();
 
 
-const allEnums = [];
-
-
 if (!existsSync(outputPath))
 	mkdirSync(outputPath);
 readdirSync(outputPath).forEach(f => rmSync(`${outputPath}/${f}`));
-
-
-const globalModuleExportedMessages = new Map();
 
 console.log("Found", files.length, "files to parse");
 
@@ -45,8 +38,6 @@ for (const file of files) {
             }}
 
 		});
-
-		// allEnums.push(...enums);
 	} catch (e) {
 		console.error(`Unable to parse "${file}":`, e);
 		continue;

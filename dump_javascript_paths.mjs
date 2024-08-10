@@ -51,21 +51,3 @@ export async function GetFilesToParse() {
 	const promises = await Promise.all(paths.map(GetJavascriptFiles));
 	return [].concat(...promises).sort();
 }
-
-async function* GetRecursiveJavascriptFiles(dir) {
-	const dirents = await readDir(dir, { withFileTypes: true });
-	for (const dirent of dirents) {
-		const res = pathResolve(dir, dirent.name);
-		if (dirent.isDirectory()) {
-			yield* GetRecursiveJavascriptFiles(res);
-		} else if (dirent.isFile() && dirent.name.endsWith(".js")) {
-			yield res;
-		}
-	}
-}
-
-export async function* GetRecursiveFilesToParse() {
-	for (const path of pathsToRecurse) {
-		yield* GetRecursiveJavascriptFiles(path);
-	}
-}
