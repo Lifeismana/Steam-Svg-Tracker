@@ -34,7 +34,7 @@ for await (const file of GetRecursiveFilesToParse()) {
 					last_function_seen = node;
 				}
 				
-				if (node.type === Syntax.CallExpression && node.callee?.property?.name === 'createElement' && node.arguments?.[0].value === 'svg') {
+				if (node.type === Syntax.CallExpression && node.callee?.property?.name === 'createElement' && node.arguments?.[0]?.value === 'svg') {
 					// as i understand it we don't want to go deeper if it's an svg (bc there can be svg in svg but we're only interested in the one most "outside")
 					this.skip();
 					const svg = (createSvgBody(node)).end({ prettyPrint: true });
