@@ -1,32 +1,31 @@
 import {basename, sep as pathSep } from "path";
 import { readFile } from "fs/promises";
-import { createWriteStream, existsSync, mkdirSync, rmSync, readdirSync } from "fs";
+import { createWriteStream, existsSync, mkdirSync, rmSync } from "fs";
 import { createHash } from "node:crypto";
 import { parse, latestEcmaVersion } from "espree";
 import { traverse, Syntax } from "estraverse";
-import { GetFilesToParse } from "./dump_javascript_paths.mjs";
+import {  GetRecursiveFilesToParse } from "./dump_javascript_paths.mjs";
 import { create } from "xmlbuilder2";
 
 const outputPath = "./svgs";
-const files = await GetFilesToParse();
 
 
-if (!existsSync(outputPath))
-	mkdirSync(outputPath);
-readdirSync(outputPath).forEach(f => rmSync(`${outputPath}/${f}`));
+if (existsSync(outputPath)) {
+	rmSync(outputPath, { recursive: true });
+}
 
-console.log("Found", files.length, "files to parse");
-
-for (const file of files) {
+for await (const file of GetRecursiveFilesToParse()) {
 	if (!file.includes("library.js")) {
 		continue;
 	}
 	try {
+		console.log("Parsing", file);
+
 		const code = await readFile(file);
 		const ast = parse(code, { ecmaVersion: latestEcmaVersion, loc: true });
 		let last_function_seen = null;
 		const file_basename = basename(file, '.js');
-		console.log("Parsing", file);
+
 		// output folder / resource folder / file name
 		const outputFolder = `${outputPath}/${file.replace(process.cwd(), '').split(pathSep)[1]}/${file_basename}`;
 		if (!existsSync(outputFolder))
