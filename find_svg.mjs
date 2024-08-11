@@ -15,9 +15,6 @@ if (existsSync(outputPath)) {
 }
 
 for await (const file of GetRecursiveFilesToParse()) {
-	if (!file.includes("library.js")) {
-		continue;
-	}
 	try {
 		console.log("Parsing", file);
 
