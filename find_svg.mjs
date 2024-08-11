@@ -58,16 +58,20 @@ function createSvgBody(node, xml = undefined) {
 	if (!node) {
 		return xml;
 	}
-	const elem = xml.ele(node.arguments[0].value);
-	node.arguments[1].properties?.forEach((prop) => {
-		if (prop.type === 'SpreadElement' || prop.key.name === 'className') return;
-		elem.att(fixSVGKeyName(prop.key) , prop.value.value);
-	})
-	node.arguments.slice(2)?.forEach((prop) => {
-		if (prop.type === 'CallExpression') {
-			createSvgBody(prop, elem);
-		}
-	});
+	try {
+		const elem = xml.ele(node.arguments[0].value);
+		node.arguments[1].properties?.forEach((prop) => {
+			if (prop.type === 'SpreadElement' || prop.key.name === 'className') return;
+			elem.att(fixSVGKeyName(prop.key) , prop.value.value);
+		})
+		node.arguments.slice(2)?.forEach((prop) => {
+			if (prop.type === 'CallExpression') {
+				createSvgBody(prop, elem);
+			}
+		});
+	} catch (e) {
+		console.warn("probably some vars that i can do nothing about",e);
+	}
 
 	return xml;
 }
