@@ -37,10 +37,12 @@ for await (const file of GetRecursiveFilesToParse()) {
 				if (node.type === Syntax.CallExpression && node.callee?.property?.name === 'createElement' && node.arguments?.[0]?.value === 'svg') {
 					// as i understand it we don't want to go deeper if it's an svg (bc there can be svg in svg but we're only interested in the one most "outside")
 					this.skip();
-					const svg = (createSvgBody(node)).end({ prettyPrint: true });
-					const hash = createHash('sha1').update(svg).digest('hex').substring(0,16);
+
+					const svg = createSvgBody(node);
+					const svgString = svg.end({ prettyPrint: true });
+					const hash = createHash('sha1').update(svgString).digest('hex').substring(0,16);
 					console.debug(`Hash ${hash} from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
-					OutputToFile(`${outputFolder}/${last_function_seen?.id.name ?? "null"}_${hash}.svg`, svg);
+					OutputToFile(`${outputFolder}/${last_function_seen?.id.name ?? "null"}_${hash}.svg`, svgString);
             }}
 
 		});
