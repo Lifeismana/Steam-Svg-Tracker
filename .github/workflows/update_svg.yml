@@ -1,0 +1,32 @@
+name: Update SVG
+
+on:
+    schedule:
+        - cron: "0 5 * * *"
+    workflow_dispatch:
+
+jobs:
+    update-svg:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Setup Node
+              uses: actions/setup-node@v3
+              with:
+                node-version: 22
+            - name: Install
+              run: npm ci
+            - name: Setup GPG Key & Git config
+              run: |
+                gpg --batch --import <( echo "$GPG_SIGNING_KEY")
+                git config --global user.signingkey "$GPG_KEY_ID"
+                git config --global user.name "$GIT_NAME"
+                git config --global user.email "$GIT_EMAIL"
+              env:
+                    GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+                    GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+                    GIT_NAME: ${{ secrets.GIT_NAME }}
+                    GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+            - name: Update SVG
+              run: ./update.sh
