@@ -2,7 +2,9 @@
 	path = SteamTracking
 	url = git@github.com:SteamDatabase/SteamTracking.git
 	shallow = true
+	branch = master
 [submodule "GameTracking-SteamVR"]
 	path = GameTracking-SteamVR
 	url = git@github.com:Lifeismana/GameTracking-SteamVR.git
 	shallow = true
+	branch = master
