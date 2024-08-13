@@ -11,7 +11,7 @@ set -e
 
 cd "$(dirname "$0")"
 
-if [ $1 == "force" ]; then
+if [[ $1 = "force" ]]; then
     echo "forcing update"
     UpdateSvg
 fi
