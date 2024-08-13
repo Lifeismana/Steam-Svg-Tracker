@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="buttonGradient">
+      <stop offset="0%" stopColor="var(--bordercolor)" stopOpacity="0.8"/>
+      <stop offset="100%" stopColor="var(--bordercolor)" stopOpacity="0"/>
+    </radialGradient>
+  </defs>
+  <polyline id="SourceLine" stroke="var(--bordercolor)" stroke-width="0.1rem" fill="transparent"/>
+  <polyline id="SourcePath" stroke="var(--bordercolor)" stroke-width="0.1rem" fill="transparent"/>
+  <circle id="SourceCircle" r="2rem" fill="url(#buttonGradient)"/>
+</svg>

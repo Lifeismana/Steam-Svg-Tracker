@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="buttonGradient">
+      <stop offset="0%" stopColor="var(--bordercolor)" stopOpacity="1"/>
+      <stop offset="100%" stopColor="var(--bordercolor)" stopOpacity="0"/>
+    </radialGradient>
+    <filter id="background" x="-10%" y="-10%" width="120%" height="120%">
+      <feFlood floodColor="#1d4e62e0"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2 2" result="shadow"/>
+      <feOffset dx="1" dy="1"/>
+    </filter>
+  </defs>
+  <text filter="url(#shadow)"/>
+  <text filter="url(#background)"/>
+  <circle id="SourceCircle" r="0.5rem" fill="url(#buttonGradient)"/>
+</svg>
