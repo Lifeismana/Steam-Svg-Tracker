@@ -5,6 +5,13 @@ on:
         - cron: "0 5 * * *"
     workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     update-svg:
         runs-on: ubuntu-latest
