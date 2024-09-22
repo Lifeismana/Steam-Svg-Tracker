@@ -1,3 +1,5 @@
+/* Based on https://github.com/SteamDatabase/SteamTracking/blob/master/dump_javascript_paths.mjs
+Thanks xPaw! */
 import { resolve as pathResolve } from "path";
 import { readdir as readDir } from "fs/promises";
 

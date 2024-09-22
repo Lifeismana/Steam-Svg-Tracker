@@ -4,11 +4,10 @@ import { createWriteStream, existsSync, mkdirSync, rmSync } from "fs";
 import { createHash } from "node:crypto";
 import { parse, latestEcmaVersion } from "espree";
 import { traverse, Syntax } from "estraverse";
-import {  GetRecursiveFilesToParse } from "./dump_javascript_paths.mjs";
+import { GetRecursiveFilesToParse } from "./dump_javascript_paths.mjs";
 import { create } from "xmlbuilder2";
 
 const outputPath = "./svgs";
-
 
 if (existsSync(outputPath)) {
 	rmSync(outputPath, { recursive: true });
@@ -42,14 +41,12 @@ for await (const file of GetRecursiveFilesToParse()) {
 					console.debug(`Hash ${hash} from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
 					OutputToFile(`${outputFolder}/${last_function_seen?.id.name ?? "null"}_${hash}.svg`, svg);
             }}
-
 		});
 	} catch (e) {
 		console.error(`Unable to parse "${file}":`, e);
 		continue;
 	}
 }
-
 
 function createSvgBody(node, xml = undefined) {
 	if (!xml) {
@@ -72,7 +69,6 @@ function createSvgBody(node, xml = undefined) {
 	} catch (e) {
 		console.warn("probably some vars that i can do nothing about",e);
 	}
-
 	return xml;
 }
 
@@ -118,7 +114,3 @@ function OutputToFile(fileName, svg) {
 		stream.end();
 	});
 }
-
-
-
-
