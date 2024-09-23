@@ -11,6 +11,14 @@ set -e
 
 cd "$(dirname "$0")"
 
+git submodule init
+
+echo "Configuring submodules sparse checkout"
+git submodule foreach 'git -C . config core.sparseCheckout true && echo "*.js" > ../.git/modules/$name/info/sparse-checkout'
+
+echo "Initializing submodules"
+git submodule update
+
 if [[ $1 = "force" ]]; then
     echo "forcing update"
     UpdateSvg
