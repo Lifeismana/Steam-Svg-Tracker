@@ -2,9 +2,15 @@
 
 UpdateSvg() {
     node find_svg.mjs
-    git add -A
-    git commit -S -a -m "$(git status --porcelain | wc -l) svgs | $(git status --porcelain|awk '{print "basename " $2}'| sh | sed '{:q;N;s/\n/, /g;t q}')"
-    git push
+    changes=$(git ls-files -s $(git ls-files -m) | sed -e '/^16/d' )
+    if [ -n "$changes" ]; then
+        echo "Changes detected"
+        git add -A
+        git commit -S -a -m "$(git status --porcelain | wc -l) svgs | $(git status --porcelain|awk '{print "basename " $2}'| sh | sed '{:q;N;s/\n/, /g;t q}')"
+        git push
+    else    
+        echo "No changes detected"
+    fi
 }
 
 set -e
