@@ -10,6 +10,7 @@ const pathsToRecurse = [
 
 const blocklist = [
 	"licenses.js",
+	"steamaudio.js",
 ];
 
 async function* GetRecursiveJavascriptFiles(dir) {
