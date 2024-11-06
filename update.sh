@@ -3,7 +3,10 @@
 UpdateSvg() {
     node find_svg.mjs
     changes=$(git ls-files -s $(git ls-files -m) | sed -e '/^16/d' )
-    if [ -n "$changes" ]; then
+    if [ "$PULL_REQUEST" ]; then
+        echo "Pull request detected"
+        echo "Changes: $(echo \"$changes\" | wc -l) files"
+    elif [ -n "$changes" ]; then
         echo "Changes detected"
         git add -A
         git commit -S -a -m "$(git status --porcelain | wc -l) svgs | $(git status --porcelain|awk '{print "basename " $2}'| sh | sed '{:q;N;s/\n/, /g;t q}')"
