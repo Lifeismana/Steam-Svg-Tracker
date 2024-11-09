@@ -15,7 +15,7 @@ if (existsSync(outputPath)) {
 
 for await (const file of GetRecursiveFilesToParse()) {
 	try {
-		console.log("Parsing", file);
+		console.log("::group::Parsing", file);
 
 		const code = await readFile(file);
 		const ast = parse(code, { ecmaVersion: latestEcmaVersion, loc: true });
@@ -43,8 +43,10 @@ for await (const file of GetRecursiveFilesToParse()) {
             }}
 		});
 	} catch (e) {
-		console.error(`Unable to parse "${file}":`, e);
+		console.error(`::error::Unable to parse "${file}":`, e);
 		continue;
+	} finally {
+		console.log("::endgroup::");
 	}
 }
 
@@ -67,7 +69,7 @@ function createSvgBody(node, xml = undefined) {
 			}
 		});
 	} catch (e) {
-		console.warn("probably some vars that i can do nothing about",e);
+		console.warn("::warning::probably some vars that i can do nothing about",e);
 	}
 	return xml;
 }
