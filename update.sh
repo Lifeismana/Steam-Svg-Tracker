@@ -3,7 +3,7 @@
 UpdateSvg() {
     node find_svg.mjs
     changes=$(git ls-files -s $(git ls-files -m) | sed -e '/^16/d' )
-    if [ "$PULL_REQUEST" ]; then
+    if [ "$PULL_REQUEST" == "true" ]; then
         echo "Pull request detected"
         echo "Changes: $(echo \"$changes\" | wc -l) files"
     elif [ -n "$changes" ]; then
