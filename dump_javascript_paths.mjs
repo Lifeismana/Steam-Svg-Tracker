@@ -1,17 +1,11 @@
 /* Based on https://github.com/SteamDatabase/SteamTracking/blob/master/dump_javascript_paths.mjs
 Thanks xPaw! */
-import { resolve as pathResolve } from "path";
-import { readdir as readDir } from "fs/promises";
+import { readdir as readDir } from "node:fs/promises";
+import { resolve as pathResolve } from "node:path";
 
-const pathsToRecurse = [
-	"./SteamTracking/",
-	"./GameTracking-SteamVR/",
-];
+const pathsToRecurse = ["./SteamTracking/", "./GameTracking-SteamVR/"];
 
-const blocklist = [
-	"licenses.js",
-	"steamaudio.js",
-];
+const blocklist = ["licenses.js", "steamaudio.js"];
 
 async function* GetRecursiveJavascriptCssFiles(dir) {
 	const dirents = await readDir(dir, { withFileTypes: true });

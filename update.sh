@@ -11,7 +11,7 @@ UpdateSvg() {
     elif [ -n "$changes" -o -n "$new" ]; then
         echo "Changes detected"
         git add -A
-        git commit -S -a -m "$(git status --porcelain | wc -l) svgs | $(git status --porcelain|awk '{print "basename " $2}'| sh | sed '{:q;N;s/\n/, /g;t q}')"
+        git commit -S -a -m "$(git status --porcelain | wc -l) files | $(git status --porcelain|awk '{print "basename " $2}'| sh | sed '{:q;N;s/\n/, /g;t q}')"
         git push
     else    
         echo "No changes detected"
