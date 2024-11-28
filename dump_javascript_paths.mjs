@@ -13,13 +13,13 @@ const blocklist = [
 	"steamaudio.js",
 ];
 
-async function* GetRecursiveJavascriptFiles(dir) {
+async function* GetRecursiveJavascriptCssFiles(dir) {
 	const dirents = await readDir(dir, { withFileTypes: true });
 	for (const dirent of dirents) {
 		const res = pathResolve(dir, dirent.name);
 		if (dirent.isDirectory()) {
-			yield* GetRecursiveJavascriptFiles(res);
-		} else if (dirent.isFile() && dirent.name.endsWith(".js") && !blocklist.some((block) => res.includes(block))) {
+			yield* GetRecursiveJavascriptCssFiles(res);
+		} else if (dirent.isFile() && (dirent.name.endsWith(".js") || dirent.name.endsWith(".css")) && !blocklist.some((block) => res.includes(block))) {
 			yield res;
 		}
 	}
@@ -27,6 +27,6 @@ async function* GetRecursiveJavascriptFiles(dir) {
 
 export async function* GetRecursiveFilesToParse() {
 	for (const path of pathsToRecurse) {
-		yield* GetRecursiveJavascriptFiles(path);
+		yield* GetRecursiveJavascriptCssFiles(path);
 	}
 }

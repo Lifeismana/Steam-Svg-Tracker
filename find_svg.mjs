@@ -7,41 +7,71 @@ import { traverse, Syntax } from "estraverse";
 import { GetRecursiveFilesToParse } from "./dump_javascript_paths.mjs";
 import { create } from "xmlbuilder2";
 
-const outputPath = "./svgs";
+const svgOutputPath = "./svgs";
+const pngOutputPath = "./pngs";
 
-if (existsSync(outputPath)) {
-	rmSync(outputPath, { recursive: true });
+if (existsSync(svgOutputPath)) {
+	rmSync(svgOutputPath, { recursive: true });
 }
+
+if (existsSync(pngOutputPath)) {
+	rmSync(pngOutputPath, { recursive: true });
+}
+
+const base64PngPattern = RegExp("data:image/png;base64,([A-Za-z0-9+/=]+)", "g");
 
 for await (const file of GetRecursiveFilesToParse()) {
 	try {
 		console.log("::group::Parsing", file);
 
-		const code = await readFile(file);
-		const ast = parse(code, { ecmaVersion: latestEcmaVersion, loc: true });
-		let last_function_seen = null;
+		const code = await readFile(file, "utf8");
+
 		const file_basename = basename(file, '.js');
 
+		if ( file.endsWith('.js') ) {
+			console.log("Looking for svgs");
+
+			const ast = parse(code, { ecmaVersion: latestEcmaVersion, loc: true });
+			let last_function_seen = null;
+			
+
+			// output folder / resource folder / file name
+			const outputFolder = `${svgOutputPath}/${file.replace(process.cwd(), '').split(pathSep)[1]}/${file_basename}`;
+			if (!existsSync(outputFolder))
+				mkdirSync(outputFolder, { recursive: true });
+
+			traverse(ast, {
+				enter: function (node) {
+					if(node.type === Syntax.FunctionDeclaration) {
+						last_function_seen = node;
+					}
+					
+					if (node.type === Syntax.CallExpression && node.callee?.property?.name === 'createElement' && node.arguments?.[0]?.value === 'svg') {
+						// as i understand it we don't want to go deeper if it's an svg (bc there can be svg in svg but we're only interested in the one most "outside")
+						this.skip();
+						const svg = (createSvgBody(node)).end({ prettyPrint: true });
+						const hash = createHash('sha1').update(svg).digest('hex').substring(0,16);
+						console.debug(`Hash ${hash} from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
+						OutputToFile(`${outputFolder}/${last_function_seen?.id.name ?? "null"}_${hash}.svg`, `${svg}\n`);
+				}}
+			});
+		}
+
+		console.log("Looking for pngs")
+
 		// output folder / resource folder / file name
-		const outputFolder = `${outputPath}/${file.replace(process.cwd(), '').split(pathSep)[1]}/${file_basename}`;
+		const outputFolder = `${pngOutputPath}/${file.replace(process.cwd(), '').split(pathSep)[1]}/${file_basename}`;
 		if (!existsSync(outputFolder))
 			mkdirSync(outputFolder, { recursive: true });
+		
+		const result = code.matchAll(base64PngPattern);
+		for (const match of result) {
+			const png = Buffer.from(match[1], "base64");
+			const hash = createHash('sha1').update(png).digest('hex').substring(0,16);
+			console.debug(`Hash ${hash} from ${file}`);
+			OutputToFile(`${outputFolder}/${hash}.png`, png);
+		}
 
-        traverse(ast, {
-            enter: function (node) {
-				if(node.type === Syntax.FunctionDeclaration) {
-					last_function_seen = node;
-				}
-				
-				if (node.type === Syntax.CallExpression && node.callee?.property?.name === 'createElement' && node.arguments?.[0]?.value === 'svg') {
-					// as i understand it we don't want to go deeper if it's an svg (bc there can be svg in svg but we're only interested in the one most "outside")
-					this.skip();
-					const svg = (createSvgBody(node)).end({ prettyPrint: true });
-					const hash = createHash('sha1').update(svg).digest('hex').substring(0,16);
-					console.debug(`Hash ${hash} from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
-					OutputToFile(`${outputFolder}/${last_function_seen?.id.name ?? "null"}_${hash}.svg`, svg);
-            }}
-		});
 	} catch (e) {
 		console.error(`::error::Unable to parse "${file}":`, e);
 		continue;
@@ -104,7 +134,7 @@ function fixSVGKeyName(key) {
 	}
 }
 
-function OutputToFile(fileName, svg) {
+function OutputToFile(fileName, content) {
 	return new Promise((resolve) => {
 		const stream = createWriteStream(fileName, {
 			flags: "w",
@@ -112,7 +142,7 @@ function OutputToFile(fileName, svg) {
 		});
 		stream.once("close", resolve);
 
-		stream.write(`${svg}\n`);
+		stream.write(content);
 		stream.end();
 	});
 }
