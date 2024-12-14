@@ -31,7 +31,9 @@ for await (const file of GetRecursiveFilesToParse()) {
 		if (file.endsWith(".js")) {
 			console.log("Looking for svgs");
 
-			const ast = parse(code, { ecmaVersion: latestEcmaVersion, loc: true });
+			const sourceType = file.includes("/ssr/") ? "module" : "script";
+
+			const ast = parse(code, { ecmaVersion: latestEcmaVersion, loc: true, sourceType: sourceType });
 			let last_function_seen = null;
 
 			// output folder / resource folder / file name
@@ -44,6 +46,7 @@ for await (const file of GetRecursiveFilesToParse()) {
 						last_function_seen = node;
 					}
 
+					// TODO ssr doesn't have its svg elems under createElement
 					if (node.type === Syntax.CallExpression && node.callee?.property?.name === "createElement" && node.arguments?.[0]?.value === "svg") {
 						// as i understand it we don't want to go deeper if it's an svg (bc there can be svg in svg but we're only interested in the one most "outside")
 						this.skip();
@@ -75,7 +78,7 @@ for await (const file of GetRecursiveFilesToParse()) {
 		console.log("::endgroup::");
 	}
 }
-
+// TODO handle ssr svg format
 function createSvgBody(node, xml = create()) {
 	if (!node) {
 		return xml;
