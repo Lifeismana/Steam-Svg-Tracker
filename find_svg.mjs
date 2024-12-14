@@ -50,10 +50,23 @@ for await (const file of GetRecursiveFilesToParse()) {
 					if (node.type === Syntax.CallExpression && node.callee?.property?.name === "createElement" && node.arguments?.[0]?.value === "svg") {
 						// as i understand it we don't want to go deeper if it's an svg (bc there can be svg in svg but we're only interested in the one most "outside")
 						this.skip();
-						const svg = createSvgBody(node).end({ prettyPrint: true });
-						const hash = createHash("sha1").update(svg).digest("hex").substring(0, 16);
+						const svg = createSvgBody(node);
+						const svgString = svg.end({ prettyPrint: true });
+						const hash = createHash("sha1").update(svgString).digest("hex").substring(0, 16);
 						console.debug(`Hash ${hash} from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
-						OutputToFile(`${outputFolder}/${last_function_seen?.id.name ?? "null"}_${hash}.svg`, `${svg}\n`);
+						const baseOutput = `${outputFolder}/${last_function_seen?.id.name ?? "null"}`;
+						OutputToFile(`${baseOutput}_${hash}.svg`, `${svgString}\n`);
+
+						if (svg.node.lastChild.nodeName === "svg") {
+							if ( svg.node.lastChild.getAttribute("fill") === "none" ) {
+								console.debug("Outputting fill black");
+								const svgFillBlack = svg;
+								svgFillBlack.node.lastChild.setAttribute("fill", "black");
+								OutputToFile(`${baseOutput}_fillblack_${hash}.svg`, `${svgFillBlack.end({ prettyPrint: true })}\n`);
+							}
+						} else {
+							console.info(`lastChild isn't the svg node wtf? from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
+						}
 					}
 				},
 			});
