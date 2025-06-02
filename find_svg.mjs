@@ -61,23 +61,29 @@ for await (const file of GetRecursiveFilesToParse()) {
 
 		console.log("Looking for pngs");
 
-		// output folder / resource folder / file name
-		const outputFolder = `${pngOutputPath}/${file.replace(process.cwd(), "").split(pathSep)[1]}/${file_basename}`;
-		if (!existsSync(outputFolder)) mkdirSync(outputFolder, { recursive: true });
+		regexSearchAndOutput(code, base64PngPattern, pngOutputPath, file, file_basename, "png");
 
-		const result = code.matchAll(base64PngPattern);
-		for (const match of result) {
-			const png = Buffer.from(match[1], "base64");
-			const hash = createHash("sha1").update(png).digest("hex").substring(0, 16);
-			console.debug(`Hash ${hash} from ${file}`);
-			OutputToFile(`${outputFolder}/${hash}.png`, png);
-		}
 	} catch (e) {
 		console.error(`::error::Unable to parse "${file}":`, e);
 	} finally {
 		console.log("::endgroup::");
 	}
 }
+
+function regexSearchAndOutput(fileContent, pattern, baseOutputFolder, file, file_basename, extension) {
+		const outputFolder = `${baseOutputFolder}/${file.replace(process.cwd(), "").split(pathSep)[1]}/${file_basename}`;
+		if (!existsSync(outputFolder)) mkdirSync(outputFolder, { recursive: true });
+
+		const result = fileContent.matchAll(pattern);
+		for (const match of result) {
+			const data = Buffer.from(match[1], "base64");
+			const hash = createHash("sha1").update(data).digest("hex").substring(0, 16);
+			console.debug(`Hash ${hash} from ${file}`);
+			OutputToFile(`${outputFolder}/${hash}.${extension}`, data);
+		}
+}
+
+
 // TODO handle ssr svg format
 function createSvgBody(node, xml = create()) {
 	if (!node) {
