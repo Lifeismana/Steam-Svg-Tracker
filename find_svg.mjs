@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { createWriteStream, existsSync, mkdirSync, rmSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { basename, sep as pathSep } from "node:path";
+import { parse as pathParse, sep as pathSep } from "node:path";
 import { latestEcmaVersion, parse } from "espree";
 import { Syntax, traverse } from "estraverse";
 import { create } from "xmlbuilder2";
@@ -9,6 +9,7 @@ import { GetRecursiveFilesToParse } from "./dump_javascript_paths.mjs";
 
 const svgOutputPath = "./svgs";
 const pngOutputPath = "./pngs";
+const gifOutputPath = "./gifs";
 
 if (existsSync(svgOutputPath)) {
 	rmSync(svgOutputPath, { recursive: true });
@@ -18,7 +19,13 @@ if (existsSync(pngOutputPath)) {
 	rmSync(pngOutputPath, { recursive: true });
 }
 
+if (existsSync(gifOutputPath)) {
+	rmSync(gifOutputPath, { recursive: true });
+}
+
 const base64PngPattern = /data:image\/png;base64,([A-Za-z0-9+\/=]+)/g;
+const base64GifPattern = /data:image\/gif;base64,([A-Za-z0-9+\/=]+)/g;
+const base64SvgPattern = /data:image\/svg\+xml;base64,([A-Za-z0-9+\/=]+)/g;
 
 for await (const file of GetRecursiveFilesToParse()) {
 	try {
@@ -26,7 +33,7 @@ for await (const file of GetRecursiveFilesToParse()) {
 
 		const code = await readFile(file, "utf8");
 
-		const file_basename = basename(file, ".js");
+		const file_basename = pathParse(file).name;
 
 		if (file.endsWith(".js")) {
 			console.log("Looking for svgs");
@@ -63,6 +70,11 @@ for await (const file of GetRecursiveFilesToParse()) {
 
 		regexSearchAndOutput(code, base64PngPattern, pngOutputPath, file, file_basename, "png");
 
+		console.log("Looking for gifs");
+		regexSearchAndOutput(code, base64GifPattern, gifOutputPath, file, file_basename, "gif");
+
+		console.log("Looking for svgs in base64");
+		regexSearchAndOutput(code, base64SvgPattern, svgOutputPath, file, file_basename, "svg");
 	} catch (e) {
 		console.error(`::error::Unable to parse "${file}":`, e);
 	} finally {
@@ -71,18 +83,17 @@ for await (const file of GetRecursiveFilesToParse()) {
 }
 
 function regexSearchAndOutput(fileContent, pattern, baseOutputFolder, file, file_basename, extension) {
-		const outputFolder = `${baseOutputFolder}/${file.replace(process.cwd(), "").split(pathSep)[1]}/${file_basename}`;
-		if (!existsSync(outputFolder)) mkdirSync(outputFolder, { recursive: true });
+	const outputFolder = `${baseOutputFolder}/${file.replace(process.cwd(), "").split(pathSep)[1]}/${file_basename}`;
+	if (!existsSync(outputFolder)) mkdirSync(outputFolder, { recursive: true });
 
-		const result = fileContent.matchAll(pattern);
-		for (const match of result) {
-			const data = Buffer.from(match[1], "base64");
-			const hash = createHash("sha1").update(data).digest("hex").substring(0, 16);
-			console.debug(`Hash ${hash} from ${file}`);
-			OutputToFile(`${outputFolder}/${hash}.${extension}`, data);
-		}
+	const result = fileContent.matchAll(pattern);
+	for (const match of result) {
+		const data = Buffer.from(match[1], "base64");
+		const hash = createHash("sha1").update(data).digest("hex").substring(0, 16);
+		console.debug(`Hash ${hash} from ${file}`);
+		OutputToFile(`${outputFolder}/${hash}.${extension}`, data);
+	}
 }
-
 
 // TODO handle ssr svg format
 function createSvgBody(node, xml = create()) {
