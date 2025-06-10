@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg">
-  <path stroke="var(--bordercolor)" fill="transparent"/>
-  <circle r="2" fill="var(--bordercolor)"/>
-</svg>
