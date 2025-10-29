@@ -58,7 +58,7 @@ for await (const file of GetRecursiveFilesToParse()) {
 						// as i understand it we don't want to go deeper if it's an svg (bc there can be svg in svg but we're only interested in the one most "outside")
 						this.skip();
 						const svg = createSvgBody(node).end({ prettyPrint: true });
-						const hash = createHash("sha1").update(svg).digest("hex").substring(0, 16);
+						const hash = createHash("sha3-384").update(svg).digest("hex").substring(0, 20);
 						console.debug(`Hash ${hash} from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
 						OutputToFile(`${outputFolder}/${last_function_seen?.id.name ?? "null"}_${hash}.svg`, `${svg}\n`);
 					}
@@ -89,7 +89,7 @@ function regexSearchAndOutput(fileContent, pattern, baseOutputFolder, file, file
 	const result = fileContent.matchAll(pattern);
 	for (const match of result) {
 		const data = Buffer.from(match[1], "base64");
-		const hash = createHash("sha1").update(data).digest("hex").substring(0, 16);
+		const hash = createHash("sha3-384").update(data).digest("hex").substring(0, 20);
 		console.debug(`Hash ${hash} from ${file}`);
 		OutputToFile(`${outputFolder}/${hash}.${extension}`, data);
 	}
