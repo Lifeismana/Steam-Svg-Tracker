@@ -7,20 +7,9 @@ import { Syntax, traverse } from "estraverse";
 import { create } from "xmlbuilder2";
 import { GetRecursiveFilesToParse } from "./dump_javascript_paths.mjs";
 
-const svgOutputPath = "./svgs";
-const pngOutputPath = "./pngs";
-const gifOutputPath = "./gifs";
-
-if (existsSync(svgOutputPath)) {
-	rmSync(svgOutputPath, { recursive: true });
-}
-
-if (existsSync(pngOutputPath)) {
-	rmSync(pngOutputPath, { recursive: true });
-}
-
-if (existsSync(gifOutputPath)) {
-	rmSync(gifOutputPath, { recursive: true });
+const OutputPath = "./out";
+if (existsSync(OutputPath)) {
+	rmSync(OutputPath, { recursive: true });
 }
 
 const base64PngPattern = /data:image\/png;base64,([A-Za-z0-9+\/=]+)/g;
@@ -52,7 +41,7 @@ for await (const file of GetRecursiveFilesToParse()) {
 						const svg = createSvgBody(node).end({ prettyPrint: true });
 						const hash = createHash("sha3-384").update(svg).digest("hex").substring(0, 20);
 						console.debug(`Hash ${hash} from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
-						OutputToFile(`${svgOutputPath}/${hash}.svg`, `${svg}\n`);
+						OutputToFile(`${OutputPath}/${hash}.svg`, `${svg}\n`);
 					}
 				},
 			});
@@ -60,13 +49,13 @@ for await (const file of GetRecursiveFilesToParse()) {
 
 		console.log("Looking for pngs");
 
-		regexSearchAndOutput(code, base64PngPattern, pngOutputPath, file, file_basename, "png");
+		regexSearchAndOutput(code, base64PngPattern, OutputPath, file, file_basename, "png");
 
 		console.log("Looking for gifs");
-		regexSearchAndOutput(code, base64GifPattern, gifOutputPath, file, file_basename, "gif");
+		regexSearchAndOutput(code, base64GifPattern, OutputPath, file, file_basename, "gif");
 
 		console.log("Looking for svgs in base64");
-		regexSearchAndOutput(code, base64SvgPattern, svgOutputPath, file, file_basename, "svg");
+		regexSearchAndOutput(code, base64SvgPattern, OutputPath, file, file_basename, "svg");
 	} catch (e) {
 		console.error(`::error::Unable to parse "${file}":`, e);
 	} finally {
