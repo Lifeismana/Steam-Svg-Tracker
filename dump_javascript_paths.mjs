@@ -3,7 +3,7 @@ Thanks xPaw! */
 import { readdir as readDir } from "node:fs/promises";
 import { resolve as pathResolve } from "node:path";
 
-const pathsToRecurse = ["./SteamTracking/", "./GameTracking-SteamVR/"];
+const pathsToRecurse = ["./GameTracking-SteamVR/"];
 
 const blocklist = ["licenses.js", "steamaudio.js"];
 

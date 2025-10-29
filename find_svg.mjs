@@ -33,7 +33,6 @@ for await (const file of GetRecursiveFilesToParse()) {
 
 			traverse(ast, {
 				enter: function (node) {
-
 					// TODO ssr doesn't have its svg elems under createElement
 					if (node.type === Syntax.CallExpression && node.callee?.property?.name === "createElement" && node.arguments?.[0]?.value === "svg") {
 						// as i understand it we don't want to go deeper if it's an svg (bc there can be svg in svg but we're only interested in the one most "outside")
