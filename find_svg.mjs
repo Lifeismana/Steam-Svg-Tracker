@@ -41,9 +41,6 @@ for await (const file of GetRecursiveFilesToParse()) {
 			const sourceType = file.includes("/ssr/") ? "module" : "script";
 
 			const ast = parse(code, { ecmaVersion: latestEcmaVersion, loc: true, sourceType: sourceType });
-			// output folder / resource folder / file name
-			const outputFolder = `${svgOutputPath}/${file.replace(process.cwd(), "").split(pathSep)[1]}/${file_basename}`;
-			if (!existsSync(outputFolder)) mkdirSync(outputFolder, { recursive: true });
 
 			traverse(ast, {
 				enter: function (node) {
@@ -55,7 +52,7 @@ for await (const file of GetRecursiveFilesToParse()) {
 						const svg = createSvgBody(node).end({ prettyPrint: true });
 						const hash = createHash("sha3-384").update(svg).digest("hex").substring(0, 20);
 						console.debug(`Hash ${hash} from ${file} line ${node.loc.start.line} col ${node.loc.start.column}`);
-						OutputToFile(`${outputFolder}/${hash}.svg`, `${svg}\n`);
+						OutputToFile(`${svgOutputPath}/${hash}.svg`, `${svg}\n`);
 					}
 				},
 			});
