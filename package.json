@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"espree": "^10.1.0",
+		"espree": "^11.0.0",
 		"estraverse": "github:Lifeismana/estraverse#static-block",
 		"xmlbuilder2": "^4.0.0"
 	},
